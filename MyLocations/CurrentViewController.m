@@ -47,10 +47,17 @@
 	} else {
 		_location = nil;
 		_lastLocationError = nil;
+		_placemark = nil;
+		_lastGeocodingError = nil;
 		[self startLocationManager];
 	}
 	[self updateLabels];
 	[self configureGetButton];
+}
+-(NSString *)stringFromPlacemark:(CLPlacemark *)thePlacemark
+{
+	//Subthoroughfare is the house number, thoroughfarte is the street name, etc...
+	return [NSString stringWithFormat:@"%@ %@\n%@ %@ %@", thePlacemark.subThoroughfare, thePlacemark.thoroughfare, thePlacemark.locality, thePlacemark.administrativeArea, thePlacemark.postalCode];
 }
 -(void)updateLabels
 {
@@ -59,6 +66,16 @@
 		self.longitudeLabel.text = [NSString stringWithFormat:@"%.8f", _location.coordinate.longitude];
 		self.tagButton.hidden = NO;
 		self.messageLabel.text = @"";
+		
+		if (_placemark != nil) {
+			self.addressLabel.text = [self stringFromPlacemark:_placemark];
+		} else if (_performingReverseGeocoding) {
+			self.addressLabel.text = @"Searching for Address...";
+		} else if (_lastGeocodingError != nil) {
+			self.addressLabel.text = @"Error Finding Addeess";
+		} else {
+			self.addressLabel.text = @"No Address Found";
+		}
 	} else {
 		self.latitudeLabel.text = @"";
 		self.longitudeLabel.text = @"";
